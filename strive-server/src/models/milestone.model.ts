@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMilestone extends Document {
-  goal: mongoose.Types.ObjectId; // Reference to a Goal
+  goalId: mongoose.Types.ObjectId; // Reference to a Goal
   title: string;
   description: string;
   date: Date;
@@ -13,7 +13,7 @@ export interface IMilestone extends Document {
 
 const milestoneSchema = new Schema<IMilestone>(
   {
-    goal: {
+    goalId: {
       type: Schema.Types.ObjectId,
       ref: 'Goal',
       required: true,
@@ -30,7 +30,6 @@ const milestoneSchema = new Schema<IMilestone>(
     },
     date: {
       type: Date,
-      required: true,
     },
     completed: {
       type: Boolean,

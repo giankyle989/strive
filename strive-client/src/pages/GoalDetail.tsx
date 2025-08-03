@@ -11,6 +11,7 @@ import { Goal, Milestone } from "@/types/common";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import duration from "dayjs/plugin/duration";
+import { AddMilestoneDialog } from "@/components/AddMilestoneDialog";
 
 dayjs.extend(relativeTime);
 dayjs.extend(duration);
@@ -21,19 +22,19 @@ export function GoalDetail() {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchGoal() {
-      try {
-        const data = await getGoalById(id as string);
-        setGoal(data);
-        setMilestones(data.milestones);
-      } catch (err) {
-        console.error("Error fetching goal:", err);
-      } finally {
-        setLoading(false);
-      }
+  async function fetchGoal() {
+    try {
+      const data = await getGoalById(id as string);
+      setGoal(data);
+      setMilestones(data.milestones);
+    } catch (err) {
+      console.error("Error fetching goal:", err);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     if (id) fetchGoal();
   }, [id]);
 
@@ -139,14 +140,14 @@ export function GoalDetail() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Milestone Timeline</h2>
-            <Button variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Milestone
-            </Button>
+            <AddMilestoneDialog
+              goalId={goal._id}
+              onCreated={() => fetchGoal()}
+            />
           </div>
 
           {milestones?.length > 0 ? (
-            <MilestoneTimeline milestones={milestones} />
+            <MilestoneTimeline milestones={milestones} onRefresh={fetchGoal} />
           ) : (
             <p className="text-muted-foreground text-sm">No milestones yet.</p>
           )}

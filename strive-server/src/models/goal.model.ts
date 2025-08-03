@@ -40,12 +40,6 @@ const goalSchema = new Schema<IGoal>(
       type: Date,
       required: false,
     },
-    totalMilestones: {
-      type: Number,
-      required: false,
-      min: 1,
-      max: 100,
-    },
   },
   { timestamps: true },
 );

@@ -17,5 +17,11 @@ export type Milestone = {
   description: string;
   date: string;
   completed: boolean;
-  image?: string;
+  image: string;
+};
+
+export type MilestonePayload = {
+  goalId: string;
+  title: string;
+  description: string;
 };
