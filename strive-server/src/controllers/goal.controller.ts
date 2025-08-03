@@ -3,19 +3,38 @@ import Goal from '../models/goal.model';
 
 export const createGoal = async (req: Request, res: Response) => {
   try {
-    const { title, description } = req.body;
-    const goal = await Goal.create({ title, description, milestones: [] });
-    res.status(201).json(goal);
+    const { title, description, category, targetDate, totalMilestones } =
+      req.body;
+
+    if (!title || !description || !category) {
+      return res
+        .status(400)
+        .json({ message: 'Title, description, and category are required.' });
+    }
+
+    const newGoal = new Goal({
+      title,
+      description,
+      category,
+      targetDate,
+      totalMilestones,
+    });
+
+    await newGoal.save();
+
+    res.status(201).json(newGoal);
   } catch (err) {
-    res.status(500).json({ message: 'Error creating goal', error: err });
+    console.error(err);
+    res.status(500).json({ message: 'Error creating goal.' });
   }
 };
 
 export const getGoals = async (req: Request, res: Response) => {
   try {
-    const goals = await Goal.find();
-    res.json(goals);
+    const goals = await Goal.find().sort({ createdAt: -1 }); // newest first
+    res.status(200).json(goals);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching goals', error: err });
+    console.error('Error fetching goals:', err);
+    res.status(500).json({ message: 'Failed to fetch goals', error: err });
   }
 };
