@@ -62,16 +62,27 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
-            echo "✅ Connected to EC2 successfully."
-            cd /opt/strive-server || { echo '❌ Failed to cd into /opt/strive-server'; exit 1; }
-            git config --global --add safe.directory $(pwd)
-            echo "🔄 Pulling latest from prod..."
-            git fetch origin +refs/heads/*:refs/remotes/origin/*
-            git reset --hard origin/prod || { echo '❌ Git reset failed'; exit 1; }
-            echo "📦 Installing dependencies..."
-            npm install || { echo '❌ npm install failed'; exit 1; }
-            echo "🏗️ Building the project..."
-            npm run build || { echo '❌ Build failed'; exit 1; }
-            echo "🔁 Restarting PM2..."
-            pm2 restart strive-server || pm2 start dist/server.js --name strive-server
-            echo "✅ Deployment complete."
+                echo "✅ Connected to EC2 successfully."
+              
+                if [ ! -d "/opt/strive/strive-server" ]; then
+                  echo "📁 Directory does not exist. Cloning repo..."
+                  git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git /opt/strive/strive-server || { echo '❌ Git clone failed'; exit 1; }
+                fi
+              
+                cd /opt/strive/strive-server || { echo '❌ Failed to cd into /opt/strive/strive-server'; exit 1; }
+              
+                git config --global --add safe.directory $(pwd)
+                echo "🔄 Pulling latest from prod..."
+                git fetch origin +refs/heads/*:refs/remotes/origin/*
+                git reset --hard origin/prod || { echo '❌ Git reset failed'; exit 1; }
+              
+                echo "📦 Installing dependencies..."
+                npm install || { echo '❌ npm install failed'; exit 1; }
+              
+                echo "🏗️ Building the project..."
+                npm run build || { echo '❌ Build failed'; exit 1; }
+              
+                echo "🔁 Restarting PM2..."
+                pm2 restart strive-server || pm2 start dist/server.js --name strive-server
+              
+                echo "✅ Deployment complete."
