@@ -10,22 +10,24 @@ interface StatsCardProps {
   variant?: "default" | "success" | "milestone";
 }
 
-export function StatsCard({ 
-  title, 
-  value, 
-  description, 
-  icon: Icon, 
+export function StatsCard({
+  title,
+  value,
+  description,
+  icon: Icon,
   trend,
-  variant = "default" 
+  variant = "default",
 }: StatsCardProps) {
   const variantStyles = {
     default: "bg-gradient-card",
     success: "bg-gradient-to-br from-success-light to-white",
-    milestone: "bg-gradient-to-br from-milestone-light to-white"
+    milestone: "bg-gradient-to-br from-milestone-light to-white",
   };
 
   return (
-    <Card className={`shadow-card hover:shadow-soft transition-all duration-300 border-0 ${variantStyles[variant]}`}>
+    <Card
+      className={`shadow-card hover:shadow-soft transition-all duration-300 border-0 ${variantStyles[variant]}`}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}

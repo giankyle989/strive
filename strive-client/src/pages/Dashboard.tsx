@@ -1,59 +1,42 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GoalCard } from "@/components/GoalCard";
 import { StatsCard } from "@/components/StatsCard";
 import { Target, TrendingUp, Calendar, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-strive.jpg";
-
-// Mock data
-const mockGoals = [
-  {
-    id: "1",
-    title: "Lose 10kg",
-    description: "Achieve my target weight through consistent exercise and healthy eating habits.",
-    progress: 40,
-    totalMilestones: 10,
-    completedMilestones: 4,
-    targetDate: "Dec 2024",
-    category: "Health"
-  },
-  {
-    id: "2", 
-    title: "Finish reading 12 books",
-    description: "Expand my knowledge by reading one book per month throughout the year.",
-    progress: 75,
-    totalMilestones: 12,
-    completedMilestones: 9,
-    targetDate: "Dec 2024",
-    category: "Learning"
-  },
-  {
-    id: "3",
-    title: "Launch my website",
-    description: "Build and deploy my personal portfolio website with a blog section.",
-    progress: 60,
-    totalMilestones: 8,
-    completedMilestones: 5,
-    targetDate: "Nov 2024",
-    category: "Career"
-  }
-];
+import { getGoals } from "@/services/goalService";
+import { Goal } from "@/types/common";
 
 export function Dashboard() {
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getGoals()
+      .then((data) => setGoals(data))
+      .catch((err) => {
+        console.error("Failed to fetch goals", err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div 
+      <div
         className="relative h-48 bg-gradient-hero flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage: `linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(147, 51, 234, 0.9)), url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
         <div className="text-center text-white space-y-2">
           <h1 className="text-3xl font-bold">Welcome to Strive</h1>
-          <p className="text-white/90">Track your goals, celebrate your milestones</p>
+          <p className="text-white/90">
+            Track your goals, celebrate your milestones
+          </p>
           <Button asChild variant="secondary" className="mt-4">
             <Link to="/add-goal">
               <Plus className="w-4 h-4 mr-2" />
@@ -65,28 +48,24 @@ export function Dashboard() {
 
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatsCard
             title="Active Goals"
-            value={3}
+            value={goals.length}
             description="Currently tracking"
             icon={Target}
             variant="default"
           />
           <StatsCard
             title="Milestones Achieved"
-            value={18}
+            value={goals.reduce(
+              (acc, goal) => acc + (Number(goal.completedMilestones) || 0),
+              0
+            )}
             description="Total completed"
             icon={TrendingUp}
-            trend="+3 this week"
+            trend=""
             variant="success"
-          />
-          <StatsCard
-            title="Days Streaking"
-            value={12}
-            description="Current progress streak"
-            icon={Calendar}
-            variant="milestone"
           />
         </div>
 
@@ -98,12 +77,18 @@ export function Dashboard() {
               <Link to="/add-goal">Add Goal</Link>
             </Button>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockGoals.map((goal) => (
-              <GoalCard key={goal.id} {...goal} />
-            ))}
-          </div>
+
+          {loading ? (
+            <p>Loading goals...</p>
+          ) : goals.length === 0 ? (
+            <p className="text-muted-foreground">You have no goals yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {goals.map((goal) => (
+                <GoalCard key={goal._id} {...goal} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

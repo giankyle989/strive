@@ -5,48 +5,80 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Target, Calendar, Tag } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { createGoal } from "@/services/goalService";
 
 export function AddGoal() {
   const navigate = useNavigate();
   const { toast } = useToast();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     category: "",
     targetDate: "",
-    totalMilestones: ""
+    totalMilestones: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Simple validation
-    if (!formData.title || !formData.description || !formData.category) {
+
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.category ||
+      !formData.targetDate
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    // Simulate saving
-    toast({
-      title: "Goal Created!",
-      description: `Your goal "${formData.title}" has been created successfully.`,
-    });
+    try {
+      setIsSubmitting(true);
 
-    // Navigate back to dashboard
-    setTimeout(() => {
+      await createGoal({
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        targetDate: formData.targetDate || undefined,
+        totalMilestones: formData.totalMilestones
+          ? parseInt(formData.totalMilestones)
+          : undefined,
+      });
+
+      toast({
+        title: "Goal Created!",
+        description: `Your goal "${formData.title}" has been saved.`,
+      });
+
       navigate("/");
-    }, 1000);
+    } catch (error: any) {
+      toast({
+        title: "Failed to create goal",
+        description: error?.response?.data?.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -62,12 +94,14 @@ export function AddGoal() {
               </Link>
             </Button>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Target className="w-6 h-6" />
             <h1 className="text-2xl font-bold">Create New Goal</h1>
           </div>
-          <p className="text-white/90 mt-2">Set a new goal and start tracking your progress</p>
+          <p className="text-white/90 mt-2">
+            Set a new goal and start tracking your progress
+          </p>
         </div>
       </div>
 
@@ -86,7 +120,7 @@ export function AddGoal() {
                   <Label htmlFor="title">Goal Title *</Label>
                   <Input
                     id="title"
-                    placeholder="e.g., Lose 10kg, Read 12 books, Launch my website..."
+                    placeholder="e.g., Lose 10kg, Read 12 books..."
                     value={formData.title}
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     className="bg-background"
@@ -97,10 +131,12 @@ export function AddGoal() {
                   <Label htmlFor="description">Description *</Label>
                   <Textarea
                     id="description"
-                    placeholder="Describe your goal in detail. What does success look like?"
+                    placeholder="What does success look like?"
                     rows={4}
                     value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("description", e.target.value)
+                    }
                     className="bg-background"
                   />
                 </div>
@@ -108,19 +144,34 @@ export function AddGoal() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="category">Category *</Label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) =>
+                        handleInputChange("category", value)
+                      }
+                    >
                       <SelectTrigger className="bg-background">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="health">Health & Fitness</SelectItem>
                         <SelectItem value="career">Career & Work</SelectItem>
-                        <SelectItem value="learning">Learning & Education</SelectItem>
-                        <SelectItem value="creative">Creative & Hobbies</SelectItem>
+                        <SelectItem value="learning">
+                          Learning & Education
+                        </SelectItem>
+                        <SelectItem value="creative">
+                          Creative & Hobbies
+                        </SelectItem>
                         <SelectItem value="financial">Financial</SelectItem>
-                        <SelectItem value="personal">Personal Development</SelectItem>
-                        <SelectItem value="relationships">Relationships</SelectItem>
-                        <SelectItem value="travel">Travel & Adventure</SelectItem>
+                        <SelectItem value="personal">
+                          Personal Development
+                        </SelectItem>
+                        <SelectItem value="relationships">
+                          Relationships
+                        </SelectItem>
+                        <SelectItem value="travel">
+                          Travel & Adventure
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -131,32 +182,43 @@ export function AddGoal() {
                       id="targetDate"
                       type="date"
                       value={formData.targetDate}
-                      onChange={(e) => handleInputChange("targetDate", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("targetDate", e.target.value)
+                      }
                       className="bg-background"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="totalMilestones">Expected Milestones (Optional)</Label>
+                  <Label htmlFor="totalMilestones">
+                    Expected Milestones (Optional)
+                  </Label>
                   <Input
                     id="totalMilestones"
                     type="number"
                     placeholder="How many milestones do you expect?"
                     value={formData.totalMilestones}
-                    onChange={(e) => handleInputChange("totalMilestones", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("totalMilestones", e.target.value)
+                    }
                     className="bg-background"
                     min="1"
                     max="100"
                   />
                   <p className="text-xs text-muted-foreground">
-                    This helps track your progress. You can always add more milestones later.
+                    You can always add more milestones later.
                   </p>
                 </div>
 
                 <div className="flex gap-4 pt-4">
-                  <Button type="submit" variant="hero" className="flex-1">
-                    Create Goal
+                  <Button
+                    type="submit"
+                    variant="hero"
+                    className="flex-1"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Creating..." : "Create Goal"}
                   </Button>
                   <Button type="button" variant="outline" asChild>
                     <Link to="/">Cancel</Link>
