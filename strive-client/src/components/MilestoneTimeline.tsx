@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Circle } from "lucide-react";
+import { CheckCircle, Circle, X } from "lucide-react";
 import { Milestone } from "@/types/common";
 import dayjs from "dayjs";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,10 @@ export function MilestoneTimeline({
   milestones,
   onRefresh,
 }: MilestoneTimelineProps) {
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   return (
     <div className="space-y-6">
       {milestones.map((milestone) => {
@@ -29,9 +33,6 @@ export function MilestoneTimeline({
 
         const [title, setTitle] = useState(milestone.title);
         const [description, setDescription] = useState(milestone.description);
-        const [imageFile, setImageFile] = useState<File | null>(null);
-        const [loading, setLoading] = useState(false);
-        const [isEditing, setIsEditing] = useState(false);
 
         const handleSave = async () => {
           setLoading(true);
@@ -111,7 +112,12 @@ export function MilestoneTimeline({
                     <img
                       src={`${import.meta.env.VITE_CDN_URL}${milestone.image}`}
                       alt="Milestone"
-                      className="max-w-xs rounded-md border"
+                      onClick={() =>
+                        setPreviewImage(
+                          `${import.meta.env.VITE_CDN_URL}${milestone.image}`
+                        )
+                      }
+                      className="max-w-xs rounded-md border cursor-pointer hover:opacity-80 transition-opacity duration-200"
                     />
                   ) : (
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -173,6 +179,23 @@ export function MilestoneTimeline({
           </div>
         );
       })}
+      {previewImage && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+          <div className="relative max-w-2xl w-full p-6">
+            <button
+              className="absolute top-1 right-1 text-white text-xl"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-h-[80vh] w-full object-contain rounded-md border"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
