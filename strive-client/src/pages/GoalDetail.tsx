@@ -61,7 +61,8 @@ export function GoalDetail() {
                 <Target className="w-6 h-6" />
                 <h1 className="text-2xl font-bold">{goal.title}</h1>
                 <Badge variant="secondary" className="text-primary">
-                  {goal.category}
+                  {goal.category.charAt(0).toUpperCase() +
+                    goal.category.slice(1)}
                 </Badge>
               </div>
               <p className="text-white/90 max-w-2xl">{goal.description}</p>
@@ -126,7 +127,7 @@ export function GoalDetail() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {monthsActive >= 0 ? monthsActive : "N/A"}
+                {monthsActive >= 0 ? monthsActive : 0}
               </div>
               <p className="text-xs text-muted-foreground">Months active</p>
               <p className="text-xs text-muted-foreground">

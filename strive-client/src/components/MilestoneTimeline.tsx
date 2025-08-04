@@ -65,7 +65,7 @@ export function MilestoneTimeline({
         return (
           <div key={milestone._id} className="relative">
             {/* Timeline dot */}
-            <div className="absolute -left-6 top-4">
+            <div className="absolute -left-2 top-4">
               {isCompleted ? (
                 <CheckCircle className="w-6 h-6 text-success bg-white rounded-full" />
               ) : (
